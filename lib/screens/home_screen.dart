@@ -1,123 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sneaki_app/screens/shoe_detail_screen.dart';
+import 'package:sneaki_app/screens/test_screen.dart';
+
+import '../provider/shoe_provider.dart';
+import '../widgets/custom_shoe_card.dart';
 
 class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
-
-  final List<Shoe> shoes = [
-    Shoe(
-      name: 'Nike Air Max 270 React',
-      price: 270.00,
-      imageUrl:
-          'https://images.vegnonveg.com/resized/1360X1600/4331/air-force-1-07-whitewhite-60017a047bad7.jpeg',
-    ),
-    Shoe(
-      name: 'Nike Air Max 97',
-      price: 299.00,
-      imageUrl:
-          'https://static.nike.com/a/images/t_PDP_864_v1/f_auto,q_auto:eco/vusewzuzzza6u9pzame/air-max-97-mens-shoes-8mmt2F.png',
-    ),
-  ];
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: Text('Snkrsync', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: Colors.white,
         leading: Icon(Icons.menu),
         actions: [
-          Icon(Icons.search),
-          SizedBox(width: 16),
-          Icon(Icons.sort),
-          SizedBox(width: 16),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Icon(Icons.circle, size: 28),
-              Text('3', style: TextStyle(color: Colors.white)),
-            ],
+          // Icon(Icons.search),
+          // SizedBox(width: screenWidth * 0.05),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ShoppingCartScreen()),
+              );
+            },
+            icon: const Icon(Icons.shopping_bag),
           ),
-          SizedBox(width: 16),
         ],
-        backgroundColor: Colors.white,
-        elevation: 0,
+        actionsPadding: EdgeInsets.symmetric(horizontal: 20),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Shoes',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                ),
-                DropdownButton<String>(
-                  value: 'Sort by',
-                  underline: SizedBox(),
-                  items: [
-                    DropdownMenuItem(value: 'Sort by', child: Text('Sort by')),
-                  ],
-                  onChanged: (value) {},
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: shoes.length,
-                itemBuilder: (context, index) {
-                  final shoe = shoes[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    elevation: 0,
-                    margin: EdgeInsets.symmetric(vertical: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Image.network(shoe.imageUrl, height: 300),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Shoes',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+
+              SizedBox(height: screenHeight * 0.04),
+              Consumer<ShoeProvider>(
+                builder: (context, sp, _) {
+                  return Expanded(
+                    child: ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: sp.shoes.length,
+                      itemBuilder: (context, index) {
+                        final shoe = sp.shoes[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ShoeDetailScreen(shoe: shoe),
                               ),
-                              Icon(Icons.favorite_border),
-                            ],
+                            );
+                          },
+                          child: CustomShoeCard(
+                            shoeName: shoe.name!,
+                            shoePrice: shoe.price!,
+                            shoeImage: shoe.image!,
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                            shoe.name,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            '\$${shoe.price.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class Shoe {
-  final String name;
-  final double price;
-  final String imageUrl;
-
-  Shoe({required this.name, required this.price, required this.imageUrl});
 }
